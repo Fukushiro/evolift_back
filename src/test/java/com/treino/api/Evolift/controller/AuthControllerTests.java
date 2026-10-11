@@ -1,4 +1,4 @@
-package com.treino.api.Evolift.auth;
+package com.treino.api.Evolift.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

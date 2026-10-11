@@ -1,5 +1,10 @@
-package com.treino.api.Evolift.auth;
+package com.treino.api.Evolift.service;
 
+import com.treino.api.Evolift.dto.AuthResponse;
+import com.treino.api.Evolift.dto.LoginRequest;
+import com.treino.api.Evolift.dto.RegisterRequest;
+import com.treino.api.Evolift.model.AppUser;
+import com.treino.api.Evolift.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

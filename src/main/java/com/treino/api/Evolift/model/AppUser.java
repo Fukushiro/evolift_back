@@ -1,4 +1,4 @@
-package com.treino.api.Evolift.auth;
+package com.treino.api.Evolift.model;
 
 import java.time.LocalDateTime;
 

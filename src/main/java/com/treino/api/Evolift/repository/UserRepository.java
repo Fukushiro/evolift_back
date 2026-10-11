@@ -1,5 +1,6 @@
-package com.treino.api.Evolift.auth;
+package com.treino.api.Evolift.repository;
 
+import com.treino.api.Evolift.model.AppUser;
 import java.util.Optional;
 
 import org.springframework.dao.EmptyResultDataAccessException;

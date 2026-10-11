@@ -1,5 +1,9 @@
-package com.treino.api.Evolift.auth;
+package com.treino.api.Evolift.controller;
 
+import com.treino.api.Evolift.dto.AuthResponse;
+import com.treino.api.Evolift.dto.LoginRequest;
+import com.treino.api.Evolift.dto.RegisterRequest;
+import com.treino.api.Evolift.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

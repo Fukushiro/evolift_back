@@ -1,4 +1,4 @@
-package com.treino.api.Evolift.auth;
+package com.treino.api.Evolift.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
