@@ -31,7 +31,7 @@ public class AuthService {
 		String passwordHash = passwordEncoder.encode(request.password());
 		AppUser user = userRepository.save(request.username(), passwordHash);
 
-		return new AuthResponse(user.id(), user.username(), "User registered successfully");
+		return new AuthResponse(user.id(), user.username(), "User registered successfully", user.role());
 	}
 
 	public AuthResponse login(LoginRequest request) {
@@ -44,7 +44,7 @@ public class AuthService {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
 		}
 
-		return new AuthResponse(user.id(), user.username(), "Login successful");
+		return new AuthResponse(user.id(), user.username(), "Login successful", user.role());
 	}
 
 	private void validateCredentials(String username, String password) {

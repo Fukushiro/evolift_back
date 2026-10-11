@@ -39,6 +39,7 @@ class AuthControllerTests {
 		assertThat(registerResponse.statusCode()).isEqualTo(201);
 		assertThat(registerResponse.body()).contains(username);
 		assertThat(registerResponse.body()).contains("User registered successfully");
+		assertThat(registerResponse.body()).contains("\"role\":\"USUARIO\"");
 
 		HttpResponse<String> loginResponse = client.send(post("/auth/login", body), HttpResponse.BodyHandlers.ofString());
 

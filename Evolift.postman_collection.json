@@ -24,6 +24,142 @@
 			"response": []
 		},
 		{
+			"name": "Listar Treinos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/treinos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar Treino",
+			"request": {
+				"method": "POST",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"nome\": \"Treino A\",\n\t\"quantidadeSeries\": 4,\n\t\"quantidadeExecucoes\": 12\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/treinos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Treino por ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/treinos/{{treinoId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos",
+						"{{treinoId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Atualizar Treino",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"nome\": \"Treino A atualizado\",\n\t\"quantidadeSeries\": 3,\n\t\"quantidadeExecucoes\": 10\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/treinos/{{treinoId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos",
+						"{{treinoId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Excluir Treino",
+			"request": {
+				"method": "DELETE",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/treinos/{{treinoId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos",
+						"{{treinoId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Register User",
 			"request": {
 				"method": "POST",
@@ -82,6 +218,21 @@
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "treinoId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "adminUsername",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminPassword",
+			"value": "",
 			"type": "string"
 		}
 	]

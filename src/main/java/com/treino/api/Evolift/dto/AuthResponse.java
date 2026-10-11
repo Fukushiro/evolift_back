@@ -1,4 +1,6 @@
 package com.treino.api.Evolift.dto;
 
-public record AuthResponse(Long id, String username, String message) {
+import com.treino.api.Evolift.model.Role;
+
+public record AuthResponse(Long id, String username, String message, Role role) {
 }

@@ -6,4 +6,6 @@
 		https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
 	<include file="db/changelog/changes/001-create-app-users.xml"/>
+	<include file="db/changelog/changes/002-create-treinos.xml"/>
+	<include file="db/changelog/changes/003-add-user-role.xml"/>
 </databaseChangeLog>
