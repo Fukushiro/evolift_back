@@ -2,8 +2,12 @@ package com.treino.api.Evolift;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
+@TestPropertySource(properties = {
+		"spring.datasource.url=jdbc:h2:mem:evolift_context_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+})
 class EvoliftApplicationTests {
 
 	@Test
