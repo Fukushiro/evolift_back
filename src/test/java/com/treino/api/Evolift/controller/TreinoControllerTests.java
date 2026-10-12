@@ -37,13 +37,30 @@ class TreinoControllerTests {
 		String adminUsername = "admin-" + UUID.randomUUID();
 		String adminPassword = "secret123";
 		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+		HttpResponse<String> exerciseResponse = client.send(
+				request("POST", "/exercicios", """
+						{
+							"nome": "Supino"
+						}
+						""", adminUsername, adminPassword),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(exerciseResponse.statusCode()).isEqualTo(201);
+		Matcher exerciseIdMatcher = Pattern.compile("\"id\":(\\d+)").matcher(exerciseResponse.body());
+		assertThat(exerciseIdMatcher.find()).isTrue();
+		long exerciseId = Long.parseLong(exerciseIdMatcher.group(1));
+
 		String createBody = """
 				{
 					"nome": "Treino A",
-					"quantidadeSeries": 4,
-					"quantidadeExecucoes": 12
+					"exercicios": [
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 2,
+							"quantidadeExecucoes": 10
+						}
+					]
 				}
-				""";
+				""".formatted(exerciseId);
 
 		HttpResponse<String> createResponse = client.send(
 				request("POST", "/treinos", createBody, adminUsername, adminPassword),
@@ -54,8 +71,27 @@ class TreinoControllerTests {
 		assertThat(idMatcher.find()).isTrue();
 		long treinoId = Long.parseLong(idMatcher.group(1));
 		assertThat(createResponse.body()).contains("\"nome\":\"Treino A\"");
-		assertThat(createResponse.body()).contains("\"quantidadeSeries\":4");
-		assertThat(createResponse.body()).contains("\"quantidadeExecucoes\":12");
+		assertThat(createResponse.body()).contains("\"nome\":\"Supino\"");
+		assertThat(createResponse.body()).contains("\"quantidadeSeries\":2");
+		assertThat(createResponse.body()).contains("\"quantidadeExecucoes\":10");
+
+		HttpResponse<String> secondWorkoutResponse = client.send(
+				request("POST", "/treinos", """
+						{
+							"nome": "Treino B",
+							"exercicios": [
+								{
+									"exercicioId": %d,
+									"quantidadeSeries": 4,
+									"quantidadeExecucoes": 5
+								}
+							]
+						}
+						""".formatted(exerciseId), adminUsername, adminPassword),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(secondWorkoutResponse.statusCode()).isEqualTo(201);
+		assertThat(secondWorkoutResponse.body()).contains("\"quantidadeSeries\":4");
+		assertThat(secondWorkoutResponse.body()).contains("\"quantidadeExecucoes\":5");
 
 		HttpResponse<String> getResponse = client.send(
 				request("GET", "/treinos/" + treinoId, null),
@@ -72,10 +108,15 @@ class TreinoControllerTests {
 		String updateBody = """
 				{
 					"nome": "Treino B",
-					"quantidadeSeries": 3,
-					"quantidadeExecucoes": 10
+					"exercicios": [
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 3,
+							"quantidadeExecucoes": 10
+						}
+					]
 				}
-				""";
+				""".formatted(exerciseId);
 		HttpResponse<String> updateResponse = client.send(
 				request("PUT", "/treinos/" + treinoId, updateBody),
 				HttpResponse.BodyHandlers.ofString());
@@ -102,8 +143,13 @@ class TreinoControllerTests {
 		String body = """
 				{
 					"nome": "Treino inválido",
-					"quantidadeSeries": 0,
-					"quantidadeExecucoes": 12
+					"exercicios": [
+						{
+							"exercicioId": 1,
+							"quantidadeSeries": 0,
+							"quantidadeExecucoes": 12
+						}
+					]
 				}
 				""";
 		HttpResponse<String> response = HttpClient.newHttpClient().send(
@@ -132,8 +178,13 @@ class TreinoControllerTests {
 		String body = """
 				{
 					"nome": "Treino protegido",
-					"quantidadeSeries": 3,
-					"quantidadeExecucoes": 10
+					"exercicios": [
+						{
+							"exercicioId": 1,
+							"quantidadeSeries": 3,
+							"quantidadeExecucoes": 10
+						}
+					]
 				}
 				""";
 		HttpResponse<String> unauthenticatedResponse = client.send(

@@ -25,6 +25,7 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.POST, "/treinos").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/exercicios").hasRole("ADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/treinos/**").hasRole("ADMIN")
 						.anyRequest().permitAll())
 				.httpBasic(Customizer.withDefaults())

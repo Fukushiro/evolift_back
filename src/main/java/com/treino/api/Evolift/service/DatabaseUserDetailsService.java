@@ -22,9 +22,9 @@ public class DatabaseUserDetailsService implements UserDetailsService {
 		AppUser appUser = userRepository.findByUsername(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-		return User.withUsername(appUser.username())
-				.password(appUser.passwordHash())
-				.roles(appUser.role().name())
+		return User.withUsername(appUser.getUsername())
+				.password(appUser.getPasswordHash())
+				.roles(appUser.getRole().name())
 				.build();
 	}
 }

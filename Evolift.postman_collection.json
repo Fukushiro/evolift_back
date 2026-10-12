@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "bfe63f1f-ccf2-4b5e-83da-748c8200db46",
 		"name": "Evolift",
-		"description": "Collection for the Evolift API.",
+		"description": "Collection for a API Evolift. Configure adminUsername/adminPassword com um usuário ADMIN e userUsername/userPassword com um usuário comum. Treinos são vinculados ao usuário autenticado; crie um usuário antes de criar treinos. Exercícios só podem ser criados por administradores.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -24,24 +24,7 @@
 			"response": []
 		},
 		{
-			"name": "Listar Treinos",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseUrl}}/treinos",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"treinos"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Criar Treino",
+			"name": "Criar Exercício",
 			"request": {
 				"method": "POST",
 				"auth": {
@@ -67,8 +50,90 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Treino A\",\n\t\"quantidadeSeries\": 4,\n\t\"quantidadeExecucoes\": 12\n}"
+					"raw": "{\n\t\"nome\": \"Supino reto\"\n}"
 				},
+				"url": {
+					"raw": "{{baseUrl}}/exercicios",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"exercicios"
+					]
+				}
+			},
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Exercício criado', function () {",
+							"    pm.response.to.have.status(201);",
+							"    const exercicio = pm.response.json();",
+							"    pm.collectionVariables.set('exercicioId', exercicio.id);",
+							"});"
+						]
+					}
+				}
+			],
+			"response": []
+		},
+		{
+			"name": "Listar Exercícios",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/exercicios",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"exercicios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Exercício por ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/exercicios/{{exercicioId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"exercicios",
+						"{{exercicioId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Treinos",
+			"request": {
+				"method": "GET",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{userUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"header": [],
 				"url": {
 					"raw": "{{baseUrl}}/treinos",
 					"host": [
@@ -82,9 +147,136 @@
 			"response": []
 		},
 		{
+			"name": "Criar Treino",
+			"request": {
+				"method": "POST",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{userUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"nome\": \"Treino A\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 2,\n\t\t\t\"quantidadeExecucoes\": 10\n\t\t}\n\t]\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/treinos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos"
+					]
+				}
+			},
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Treino criado', function () {",
+							"    pm.response.to.have.status(201);",
+							"    const treino = pm.response.json();",
+							"    pm.collectionVariables.set('treinoId', treino.id);",
+							"});"
+						]
+					}
+				}
+			],
+			"response": []
+		},
+		{
+			"name": "Criar outro Treino (mesmo exercício, outras quantidades)",
+			"request": {
+				"method": "POST",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{userUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"nome\": \"Treino B\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 4,\n\t\t\t\"quantidadeExecucoes\": 5\n\t\t}\n\t]\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/treinos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"treinos"
+					]
+				}
+			},
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Segundo treino criado com prescrição própria', function () {",
+							"    pm.response.to.have.status(201);",
+							"    const treino = pm.response.json();",
+							"    pm.collectionVariables.set('treinoId2', treino.id);",
+							"});"
+						]
+					}
+				}
+			],
+			"response": []
+		},
+		{
 			"name": "Buscar Treino por ID",
 			"request": {
 				"method": "GET",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{userUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						}
+					]
+				},
 				"header": [],
 				"url": {
 					"raw": "{{baseUrl}}/treinos/{{treinoId}}",
@@ -103,6 +295,21 @@
 			"name": "Atualizar Treino",
 			"request": {
 				"method": "PUT",
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{userUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						}
+					]
+				},
 				"header": [
 					{
 						"key": "Content-Type",
@@ -111,7 +318,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Treino A atualizado\",\n\t\"quantidadeSeries\": 3,\n\t\"quantidadeExecucoes\": 10\n}"
+					"raw": "{\n\t\"nome\": \"Treino A atualizado\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 3,\n\t\t\t\"quantidadeExecucoes\": 10\n\t\t}\n\t]\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/treinos/{{treinoId}}",
@@ -161,6 +368,21 @@
 		},
 		{
 			"name": "Register User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Usuário registrado', function () {",
+							"    pm.response.to.have.status(201);",
+							"    const user = pm.response.json();",
+							"    pm.collectionVariables.set('userId', user.id);",
+							"});"
+						]
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -171,7 +393,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"username\": \"usuario1\",\n\t\"password\": \"senha123\"\n}"
+					"raw": "{\n\t\"username\": \"{{userUsername}}\",\n\t\"password\": \"{{userPassword}}\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/auth/register",
@@ -198,7 +420,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"username\": \"usuario1\",\n\t\"password\": \"senha123\"\n}"
+					"raw": "{\n\t\"username\": \"{{userUsername}}\",\n\t\"password\": \"{{userPassword}}\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/auth/login",
@@ -226,6 +448,16 @@
 			"type": "string"
 		},
 		{
+			"key": "exercicioId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "treinoId2",
+			"value": "2",
+			"type": "string"
+		},
+		{
 			"key": "adminUsername",
 			"value": "",
 			"type": "string"
@@ -233,6 +465,21 @@
 		{
 			"key": "adminPassword",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "userUsername",
+			"value": "usuario1",
+			"type": "string"
+		},
+		{
+			"key": "userPassword",
+			"value": "senha123",
 			"type": "string"
 		}
 	]

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+	<changeSet id="004-exercicios-por-treino" author="codex">
+		<createTable tableName="exercicios">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="nome" type="VARCHAR(150)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="treino_exercicios">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="treino_id" type="BIGINT">
+				<constraints nullable="false" foreignKeyName="fk_treino_exercicios_treino"
+						references="treinos(id)"/>
+			</column>
+			<column name="exercicio_id" type="BIGINT">
+				<constraints nullable="false" foreignKeyName="fk_treino_exercicios_exercicio"
+						references="exercicios(id)"/>
+			</column>
+			<column name="quantidade_series" type="INT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="quantidade_execucoes" type="INT">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint tableName="treino_exercicios"
+				columnNames="treino_id, exercicio_id"
+				constraintName="uk_treino_exercicios"/>
+
+		<dropColumn tableName="treinos" columnName="quantidade_series"/>
+		<dropColumn tableName="treinos" columnName="quantidade_execucoes"/>
+	</changeSet>
+</databaseChangeLog>
