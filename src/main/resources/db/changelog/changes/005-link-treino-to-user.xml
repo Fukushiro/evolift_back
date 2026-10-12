@@ -7,9 +7,26 @@
 
 	<changeSet id="005-link-treino-to-user" author="codex">
 		<addColumn tableName="treinos">
-			<column name="app_user_id" type="BIGINT">
-				<constraints nullable="false" foreignKeyName="fk_treinos_app_user" references="app_users(id)"/>
-			</column>
+			<column name="app_user_id" type="BIGINT"/>
 		</addColumn>
+
+		<sql>
+			INSERT INTO app_users (username, password_hash, created_at)
+			SELECT 'migration-user', 'migration-user', CURRENT_TIMESTAMP
+			WHERE NOT EXISTS (SELECT 1 FROM app_users);
+		</sql>
+
+		<sql>
+			UPDATE treinos
+			SET app_user_id = (SELECT MIN(id) FROM app_users)
+			WHERE app_user_id IS NULL;
+		</sql>
+
+		<addNotNullConstraint tableName="treinos" columnName="app_user_id" columnDataType="BIGINT"/>
+		<addForeignKeyConstraint baseTableName="treinos"
+			baseColumnNames="app_user_id"
+			constraintName="fk_treinos_app_user"
+			referencedTableName="app_users"
+			referencedColumnNames="id"/>
 	</changeSet>
 </databaseChangeLog>

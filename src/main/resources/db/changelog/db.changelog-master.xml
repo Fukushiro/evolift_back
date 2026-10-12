@@ -10,4 +10,5 @@
 	<include file="db/changelog/changes/003-add-user-role.xml"/>
 	<include file="db/changelog/changes/004-exercicios-por-treino.xml"/>
 	<include file="db/changelog/changes/005-link-treino-to-user.xml"/>
+	<include file="db/changelog/changes/006-allow-null-treino-user.xml"/>
 </databaseChangeLog>

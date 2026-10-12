@@ -37,6 +37,8 @@ class TreinoControllerTests {
 		String adminUsername = "admin-" + UUID.randomUUID();
 		String adminPassword = "secret123";
 		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+		Long adminId = jdbcTemplate.queryForObject("select id from app_users where username = ?", Long.class,
+				adminUsername);
 		HttpResponse<String> exerciseResponse = client.send(
 				request("POST", "/exercicios", """
 						{
@@ -52,6 +54,7 @@ class TreinoControllerTests {
 		String createBody = """
 				{
 					"nome": "Treino A",
+					"appUserId": %d,
 					"exercicios": [
 						{
 							"exercicioId": %d,
@@ -60,7 +63,7 @@ class TreinoControllerTests {
 						}
 					]
 				}
-				""".formatted(exerciseId);
+				""".formatted(adminId, exerciseId);
 
 		HttpResponse<String> createResponse = client.send(
 				request("POST", "/treinos", createBody, adminUsername, adminPassword),
@@ -79,6 +82,7 @@ class TreinoControllerTests {
 				request("POST", "/treinos", """
 						{
 							"nome": "Treino B",
+							"appUserId": %d,
 							"exercicios": [
 								{
 									"exercicioId": %d,
@@ -87,7 +91,7 @@ class TreinoControllerTests {
 								}
 							]
 						}
-						""".formatted(exerciseId), adminUsername, adminPassword),
+						""".formatted(adminId, exerciseId), adminUsername, adminPassword),
 				HttpResponse.BodyHandlers.ofString());
 		assertThat(secondWorkoutResponse.statusCode()).isEqualTo(201);
 		assertThat(secondWorkoutResponse.body()).contains("\"quantidadeSeries\":4");
@@ -140,9 +144,12 @@ class TreinoControllerTests {
 		String adminUsername = "admin-" + UUID.randomUUID();
 		String adminPassword = "secret123";
 		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+		Long adminId = jdbcTemplate.queryForObject("select id from app_users where username = ?", Long.class,
+				adminUsername);
 		String body = """
 				{
 					"nome": "Treino inválido",
+					"appUserId": %d,
 					"exercicios": [
 						{
 							"exercicioId": 1,
@@ -151,12 +158,38 @@ class TreinoControllerTests {
 						}
 					]
 				}
-				""";
+				""".formatted(adminId);
 		HttpResponse<String> response = HttpClient.newHttpClient().send(
 				request("POST", "/treinos", body, adminUsername, adminPassword),
 				HttpResponse.BodyHandlers.ofString());
 
 		assertThat(response.statusCode()).isEqualTo(400);
+	}
+
+	@Test
+	void rejectsTreinoWithoutUserId() throws Exception {
+		HttpClient client = HttpClient.newHttpClient();
+		String adminUsername = "admin-" + UUID.randomUUID();
+		String adminPassword = "secret123";
+		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+
+		HttpResponse<String> response = client.send(
+				request("POST", "/treinos", """
+						{
+							"nome": "Treino sem usuário",
+							"exercicios": [
+								{
+									"exercicioId": 1,
+									"quantidadeSeries": 3,
+									"quantidadeExecucoes": 10
+								}
+							]
+						}
+						""", adminUsername, adminPassword),
+				HttpResponse.BodyHandlers.ofString());
+
+		assertThat(response.statusCode()).isEqualTo(400);
+		assertThat(response.body()).contains("User ID is required");
 	}
 
 	@Test

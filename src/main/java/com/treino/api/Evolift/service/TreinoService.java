@@ -109,7 +109,7 @@ public class TreinoService {
 		if (request == null || request.nome() == null || request.nome().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome is required");
 		}
-		if (requireUserId && (request.appUserId() == null || request.appUserId() < 1)) {
+		if (requireUserId && request.appUserId() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required");
 		}
 		if (request.appUserId() != null && request.appUserId() < 1) {

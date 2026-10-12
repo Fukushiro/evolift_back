@@ -26,8 +26,8 @@ public class Treino {
 	@Column(nullable = false, length = 150)
 	private String nome;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "app_user_id", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "app_user_id")
 	private AppUser appUser;
 
 	@OneToMany(mappedBy = "treino", cascade = CascadeType.ALL, orphanRemoval = true)
