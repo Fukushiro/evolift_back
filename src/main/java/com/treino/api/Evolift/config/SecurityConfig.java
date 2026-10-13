@@ -24,8 +24,10 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/treinos").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/exercicios").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/treinos").authenticated()
+						.requestMatchers(HttpMethod.POST, "/exercicios", "/exercicios/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/exercicios", "/exercicios/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/exercicios", "/exercicios/**").hasRole("ADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/treinos/**").hasRole("ADMIN")
 						.anyRequest().permitAll())
 				.httpBasic(Customizer.withDefaults())

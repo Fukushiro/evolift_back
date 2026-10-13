@@ -5,9 +5,11 @@ import com.treino.api.Evolift.model.Exercicio;
 import com.treino.api.Evolift.service.ExercicioService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -37,5 +39,16 @@ public class ExercicioController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Exercicio create(@RequestBody ExercicioRequest request) {
 		return exercicioService.create(request);
+	}
+
+	@PutMapping("/{id}")
+	public Exercicio update(@PathVariable Long id, @RequestBody ExercicioRequest request) {
+		return exercicioService.update(id, request);
+	}
+
+	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void delete(@PathVariable Long id) {
+		exercicioService.delete(id);
 	}
 }

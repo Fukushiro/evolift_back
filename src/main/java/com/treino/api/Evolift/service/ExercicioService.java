@@ -3,6 +3,7 @@ package com.treino.api.Evolift.service;
 import com.treino.api.Evolift.dto.ExercicioRequest;
 import com.treino.api.Evolift.model.Exercicio;
 import com.treino.api.Evolift.repository.ExercicioRepository;
+import com.treino.api.Evolift.repository.TreinoExercicioRepository;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,9 +13,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class ExercicioService {
 
 	private final ExercicioRepository exercicioRepository;
+	private final TreinoExercicioRepository treinoExercicioRepository;
 
-	public ExercicioService(ExercicioRepository exercicioRepository) {
+	public ExercicioService(ExercicioRepository exercicioRepository,
+			TreinoExercicioRepository treinoExercicioRepository) {
 		this.exercicioRepository = exercicioRepository;
+		this.treinoExercicioRepository = treinoExercicioRepository;
 	}
 
 	public List<Exercicio> findAll() {
@@ -27,9 +31,37 @@ public class ExercicioService {
 	}
 
 	public Exercicio create(ExercicioRequest request) {
+		return exercicioRepository.save(new Exercicio(validateNome(request), validatePosicao(request)));
+	}
+
+	public Exercicio update(Long id, ExercicioRequest request) {
+		String nome = validateNome(request);
+		Integer posicao = validatePosicao(request);
+		Exercicio exercicio = findById(id);
+		exercicio.update(nome, posicao);
+		return exercicioRepository.save(exercicio);
+	}
+
+	public void delete(Long id) {
+		Exercicio exercicio = findById(id);
+		if (treinoExercicioRepository.existsByExercicio_Id(id)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete an exercise used in a workout");
+		}
+		exercicioRepository.delete(exercicio);
+	}
+
+	private String validateNome(ExercicioRequest request) {
 		if (request == null || request.nome() == null || request.nome().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome is required");
 		}
-		return exercicioRepository.save(new Exercicio(request.nome().trim()));
+		return request.nome().trim();
+	}
+
+	private Integer validatePosicao(ExercicioRequest request) {
+		Integer posicao = request.posicao() == null ? 1 : request.posicao();
+		if (posicao < 1) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Posicao must be at least 1");
+		}
+		return posicao;
 	}
 }

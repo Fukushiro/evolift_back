@@ -50,6 +50,17 @@ class TreinoControllerTests {
 		Matcher exerciseIdMatcher = Pattern.compile("\"id\":(\\d+)").matcher(exerciseResponse.body());
 		assertThat(exerciseIdMatcher.find()).isTrue();
 		long exerciseId = Long.parseLong(exerciseIdMatcher.group(1));
+		HttpResponse<String> secondExerciseResponse = client.send(
+				request("POST", "/exercicios", """
+						{
+							"nome": "Remada"
+						}
+						""", adminUsername, adminPassword),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(secondExerciseResponse.statusCode()).isEqualTo(201);
+		Matcher secondExerciseIdMatcher = Pattern.compile("\"id\":(\\d+)").matcher(secondExerciseResponse.body());
+		assertThat(secondExerciseIdMatcher.find()).isTrue();
+		long secondExerciseId = Long.parseLong(secondExerciseIdMatcher.group(1));
 
 		String createBody = """
 				{
@@ -60,10 +71,15 @@ class TreinoControllerTests {
 							"exercicioId": %d,
 							"quantidadeSeries": 2,
 							"quantidadeExecucoes": 10
+						},
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 5,
+							"quantidadeExecucoes": 8
 						}
 					]
 				}
-				""".formatted(adminId, exerciseId);
+				""".formatted(adminId, exerciseId, exerciseId);
 
 		HttpResponse<String> createResponse = client.send(
 				request("POST", "/treinos", createBody, adminUsername, adminPassword),
@@ -76,6 +92,7 @@ class TreinoControllerTests {
 		assertThat(createResponse.body()).contains("\"nome\":\"Treino A\"");
 		assertThat(createResponse.body()).contains("\"nome\":\"Supino\"");
 		assertThat(createResponse.body()).contains("\"quantidadeSeries\":2");
+		assertThat(createResponse.body()).contains("\"quantidadeSeries\":5");
 		assertThat(createResponse.body()).contains("\"quantidadeExecucoes\":10");
 
 		HttpResponse<String> secondWorkoutResponse = client.send(
@@ -117,15 +134,49 @@ class TreinoControllerTests {
 							"exercicioId": %d,
 							"quantidadeSeries": 3,
 							"quantidadeExecucoes": 10
+						},
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 5,
+							"quantidadeExecucoes": 8
+						},
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 4,
+							"quantidadeExecucoes": 8
 						}
 					]
 				}
-				""".formatted(exerciseId);
+				""".formatted(exerciseId, exerciseId, secondExerciseId);
 		HttpResponse<String> updateResponse = client.send(
 				request("PUT", "/treinos/" + treinoId, updateBody),
 				HttpResponse.BodyHandlers.ofString());
 		assertThat(updateResponse.statusCode()).isEqualTo(200);
 		assertThat(updateResponse.body()).contains("Treino B");
+		assertThat(updateResponse.body()).contains("\"nome\":\"Supino\"");
+		assertThat(updateResponse.body()).contains("\"nome\":\"Remada\"");
+		assertThat(updateResponse.body()).contains("\"quantidadeSeries\":3");
+		assertThat(updateResponse.body()).contains("\"quantidadeSeries\":5");
+		assertThat(updateResponse.body()).contains("\"quantidadeSeries\":4");
+
+		String removeExerciseBody = """
+				{
+					"nome": "Treino B",
+					"exercicios": [
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 4,
+							"quantidadeExecucoes": 8
+						}
+					]
+				}
+				""".formatted(secondExerciseId);
+		HttpResponse<String> removeExerciseResponse = client.send(
+				request("PUT", "/treinos/" + treinoId, removeExerciseBody),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(removeExerciseResponse.statusCode()).isEqualTo(200);
+		assertThat(removeExerciseResponse.body()).contains("\"nome\":\"Remada\"");
+		assertThat(removeExerciseResponse.body()).doesNotContain("\"nome\":\"Supino\"");
 
 		HttpResponse<String> deleteResponse = client.send(
 				request("DELETE", "/treinos/" + treinoId, null, adminUsername, adminPassword),
@@ -193,8 +244,34 @@ class TreinoControllerTests {
 	}
 
 	@Test
-	void onlyAdminsCanCreateOrDeleteTreinos() throws Exception {
+	void authenticatedUsersCanCreateTreinosButOnlyAdminsCanDelete() throws Exception {
 		HttpClient client = HttpClient.newHttpClient();
+		String adminUsername = "admin-" + UUID.randomUUID();
+		String adminPassword = "secret123";
+		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+		HttpResponse<String> exerciseResponse = client.send(
+				request("POST", "/exercicios", """
+						{
+							"nome": "Supino"
+						}
+						""", adminUsername, adminPassword),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(exerciseResponse.statusCode()).isEqualTo(201);
+		Matcher exerciseIdMatcher = Pattern.compile("\"id\":(\\d+)").matcher(exerciseResponse.body());
+		assertThat(exerciseIdMatcher.find()).isTrue();
+		long exerciseId = Long.parseLong(exerciseIdMatcher.group(1));
+		HttpResponse<String> secondExerciseResponse = client.send(
+				request("POST", "/exercicios", """
+						{
+							"nome": "Remada"
+						}
+						""", adminUsername, adminPassword),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(secondExerciseResponse.statusCode()).isEqualTo(201);
+		Matcher secondExerciseIdMatcher = Pattern.compile("\"id\":(\\d+)").matcher(secondExerciseResponse.body());
+		assertThat(secondExerciseIdMatcher.find()).isTrue();
+		long secondExerciseId = Long.parseLong(secondExerciseIdMatcher.group(1));
+
 		String username = "usuario-" + UUID.randomUUID();
 		String password = "secret123";
 		HttpResponse<String> registration = client.send(
@@ -207,19 +284,26 @@ class TreinoControllerTests {
 				HttpResponse.BodyHandlers.ofString());
 		assertThat(registration.statusCode()).isEqualTo(201);
 		assertThat(registration.body()).contains("\"role\":\"USUARIO\"");
+		Long userId = jdbcTemplate.queryForObject("select id from app_users where username = ?", Long.class, username);
 
 		String body = """
 				{
 					"nome": "Treino protegido",
+					"appUserId": %d,
 					"exercicios": [
 						{
-							"exercicioId": 1,
+							"exercicioId": %d,
 							"quantidadeSeries": 3,
 							"quantidadeExecucoes": 10
+						},
+						{
+							"exercicioId": %d,
+							"quantidadeSeries": 4,
+							"quantidadeExecucoes": 8
 						}
 					]
 				}
-				""";
+				""".formatted(userId, exerciseId, secondExerciseId);
 		HttpResponse<String> unauthenticatedResponse = client.send(
 				request("POST", "/treinos", body),
 				HttpResponse.BodyHandlers.ofString());
@@ -228,12 +312,57 @@ class TreinoControllerTests {
 		HttpResponse<String> userCreateResponse = client.send(
 				request("POST", "/treinos", body, username, password),
 				HttpResponse.BodyHandlers.ofString());
-		assertThat(userCreateResponse.statusCode()).isEqualTo(403);
+		assertThat(userCreateResponse.statusCode()).isEqualTo(201);
+		assertThat(userCreateResponse.body()).contains("\"nome\":\"Supino\"");
+		assertThat(userCreateResponse.body()).contains("\"nome\":\"Remada\"");
+		assertThat(userCreateResponse.body()).contains("\"quantidadeSeries\":3");
+		assertThat(userCreateResponse.body()).contains("\"quantidadeSeries\":4");
 
 		HttpResponse<String> userDeleteResponse = client.send(
 				request("DELETE", "/treinos/1", null, username, password),
 				HttpResponse.BodyHandlers.ofString());
 		assertThat(userDeleteResponse.statusCode()).isEqualTo(403);
+	}
+
+	@Test
+	void userCannotCreateWorkoutForAnotherUser() throws Exception {
+		HttpClient client = HttpClient.newHttpClient();
+		String adminUsername = "admin-" + UUID.randomUUID();
+		String adminPassword = "secret123";
+		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+		Long adminId = jdbcTemplate.queryForObject(
+				"select id from app_users where username = ?", Long.class, adminUsername);
+
+		String username = "usuario-" + UUID.randomUUID();
+		String password = "secret123";
+		HttpResponse<String> registration = client.send(
+				request("POST", "/auth/register", """
+						{
+							"username": "%s",
+							"password": "%s"
+						}
+						""".formatted(username, password)),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(registration.statusCode()).isEqualTo(201);
+
+		String body = """
+				{
+					"nome": "Treino de outro usuário",
+					"appUserId": %d,
+					"exercicios": [
+						{
+							"exercicioId": 1,
+							"quantidadeSeries": 3,
+							"quantidadeExecucoes": 10
+						}
+					]
+				}
+				""".formatted(adminId);
+		HttpResponse<String> response = client.send(
+				request("POST", "/treinos", body, username, password),
+				HttpResponse.BodyHandlers.ofString());
+
+		assertThat(response.statusCode()).isEqualTo(403);
 	}
 
 	private void registerAndPromoteToAdmin(HttpClient client, String username, String password) throws Exception {

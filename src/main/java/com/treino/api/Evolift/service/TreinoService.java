@@ -55,9 +55,12 @@ public class TreinoService {
 	@Transactional
 	public Treino create(TreinoRequest request) {
 		validate(request, true);
-		AppUser appUser = findAppUserByIdOrThrow(request.appUserId());
+		AppUser appUser = findCurrentUserOrThrow();
+		if (!appUser.getId().equals(request.appUserId())) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot create a workout for another user");
+		}
 		Treino treino = new Treino(request.nome().trim(), appUser);
-		applyExercicios(treino, request.exercicios());
+		updateExercicios(treino, request.exercicios());
 		return treinoRepository.save(treino);
 	}
 
@@ -70,7 +73,7 @@ public class TreinoService {
 			AppUser appUser = findAppUserByIdOrThrow(request.appUserId());
 			treino.setAppUser(appUser);
 		}
-		applyExercicios(treino, request.exercicios());
+		updateExercicios(treino, request.exercicios());
 		return treinoRepository.save(treino);
 	}
 
@@ -119,13 +122,9 @@ public class TreinoService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one exercise is required");
 		}
 
-		Set<Long> exercicioIds = new HashSet<>();
 		for (TreinoExercicioRequest exercicio : request.exercicios()) {
 			if (exercicio == null || exercicio.exercicioId() == null || exercicio.exercicioId() < 1) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exercise ID is required");
-			}
-			if (!exercicioIds.add(exercicio.exercicioId())) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate exercise in workout");
 			}
 			if (exercicio.quantidadeSeries() == null || exercicio.quantidadeSeries() < 1) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -138,20 +137,25 @@ public class TreinoService {
 		}
 	}
 
-	private void applyExercicios(Treino treino, List<TreinoExercicioRequest> exercicios) {
-		Set<Long> exercicioIds = new HashSet<>();
+	private void updateExercicios(Treino treino, List<TreinoExercicioRequest> exercicios) {
+		Set<TreinoExercicio> exerciciosMantidos = new HashSet<>();
 		for (TreinoExercicioRequest item : exercicios) {
-			exercicioIds.add(item.exercicioId());
-			TreinoExercicio existente = treino.findTreinoExercicio(item.exercicioId());
+			TreinoExercicio existente = treino.getExercicios().stream()
+					.filter(exercicio -> exercicio.getExercicio().getId().equals(item.exercicioId()))
+					.filter(exercicio -> !exerciciosMantidos.contains(exercicio))
+					.findFirst()
+					.orElse(null);
 			if (existente != null) {
 				existente.updateQuantidades(item.quantidadeSeries(), item.quantidadeExecucoes());
+				exerciciosMantidos.add(existente);
 				continue;
 			}
 			Exercicio exercicio = exercicioRepository.findById(item.exercicioId())
 					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
 							"Exercise not found: " + item.exercicioId()));
-			treino.addExercicio(exercicio, item.quantidadeSeries(), item.quantidadeExecucoes());
+			exerciciosMantidos.add(
+					treino.addExercicio(exercicio, item.quantidadeSeries(), item.quantidadeExecucoes()));
 		}
-		treino.removeExerciciosExcept(exercicioIds);
+		treino.retainExercicios(exerciciosMantidos);
 	}
 }

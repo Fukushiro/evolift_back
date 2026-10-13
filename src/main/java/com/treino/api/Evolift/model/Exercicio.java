@@ -18,11 +18,19 @@ public class Exercicio {
 	@Column(nullable = false, length = 150)
 	private String nome;
 
+	@Column(nullable = false)
+	private Integer posicao = 1;
+
 	protected Exercicio() {
 	}
 
 	public Exercicio(String nome) {
+		this(nome, 1);
+	}
+
+	public Exercicio(String nome, Integer posicao) {
 		this.nome = nome;
+		this.posicao = posicao;
 	}
 
 	public Long getId() {
@@ -31,5 +39,14 @@ public class Exercicio {
 
 	public String getNome() {
 		return nome;
+	}
+
+	public Integer getPosicao() {
+		return posicao;
+	}
+
+	public void update(String nome, Integer posicao) {
+		this.nome = nome;
+		this.posicao = posicao;
 	}
 }

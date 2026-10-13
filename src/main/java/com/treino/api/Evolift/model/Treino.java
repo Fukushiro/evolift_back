@@ -69,18 +69,13 @@ public class Treino {
 		this.nome = nome;
 	}
 
-	public void removeExerciciosExcept(Set<Long> exercicioIds) {
-		exercicios.removeIf(item -> !exercicioIds.contains(item.getExercicio().getId()));
+	public void retainExercicios(Set<TreinoExercicio> exerciciosMantidos) {
+		exercicios.removeIf(item -> !exerciciosMantidos.contains(item));
 	}
 
-	public void addExercicio(Exercicio exercicio, Integer quantidadeSeries, Integer quantidadeExecucoes) {
-		exercicios.add(new TreinoExercicio(this, exercicio, quantidadeSeries, quantidadeExecucoes));
-	}
-
-	public TreinoExercicio findTreinoExercicio(Long exercicioId) {
-		return exercicios.stream()
-				.filter(item -> item.getExercicio().getId().equals(exercicioId))
-				.findFirst()
-				.orElse(null);
+	public TreinoExercicio addExercicio(Exercicio exercicio, Integer quantidadeSeries, Integer quantidadeExecucoes) {
+		TreinoExercicio treinoExercicio = new TreinoExercicio(this, exercicio, quantidadeSeries, quantidadeExecucoes);
+		exercicios.add(treinoExercicio);
+		return treinoExercicio;
 	}
 }
