@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -62,6 +63,7 @@ public class Treino {
 	}
 
 	public List<TreinoExercicio> getExercicios() {
+		exercicios.sort(Comparator.comparing(TreinoExercicio::getPosicao));
 		return exercicios;
 	}
 
@@ -73,8 +75,10 @@ public class Treino {
 		exercicios.removeIf(item -> !exerciciosMantidos.contains(item));
 	}
 
-	public TreinoExercicio addExercicio(Exercicio exercicio, Integer quantidadeSeries, Integer quantidadeExecucoes) {
-		TreinoExercicio treinoExercicio = new TreinoExercicio(this, exercicio, quantidadeSeries, quantidadeExecucoes);
+	public TreinoExercicio addExercicio(Exercicio exercicio, Integer quantidadeSeries, Integer quantidadeExecucoes,
+			Integer posicao) {
+		TreinoExercicio treinoExercicio = new TreinoExercicio(this, exercicio, quantidadeSeries,
+				quantidadeExecucoes, posicao);
 		exercicios.add(treinoExercicio);
 		return treinoExercicio;
 	}

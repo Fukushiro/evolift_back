@@ -70,23 +70,26 @@ class TreinoControllerTests {
 						{
 							"exercicioId": %d,
 							"quantidadeSeries": 2,
-							"quantidadeExecucoes": 10
+							"quantidadeExecucoes": 10,
+							"posicao": 2
 						},
 						{
 							"exercicioId": %d,
 							"quantidadeSeries": 5,
-							"quantidadeExecucoes": 8
+							"quantidadeExecucoes": 8,
+							"posicao": 1
 						}
 					]
 				}
-				""".formatted(adminId, exerciseId, exerciseId);
+				""".formatted(adminId, exerciseId, secondExerciseId);
 
 		HttpResponse<String> createResponse = client.send(
 				request("POST", "/treinos", createBody, adminUsername, adminPassword),
 				HttpResponse.BodyHandlers.ofString());
 
 		assertThat(createResponse.statusCode()).isEqualTo(201);
-		Matcher idMatcher = Pattern.compile("\"id\":(\\d+)").matcher(createResponse.body());
+		Matcher idMatcher = Pattern.compile("\"id\":(\\d+),\"nome\":\"Treino A\"")
+				.matcher(createResponse.body());
 		assertThat(idMatcher.find()).isTrue();
 		long treinoId = Long.parseLong(idMatcher.group(1));
 		assertThat(createResponse.body()).contains("\"nome\":\"Treino A\"");
@@ -94,6 +97,10 @@ class TreinoControllerTests {
 		assertThat(createResponse.body()).contains("\"quantidadeSeries\":2");
 		assertThat(createResponse.body()).contains("\"quantidadeSeries\":5");
 		assertThat(createResponse.body()).contains("\"quantidadeExecucoes\":10");
+		assertThat(createResponse.body()).contains("\"posicao\":1");
+		assertThat(createResponse.body()).contains("\"posicao\":2");
+		assertThat(createResponse.body().indexOf("\"nome\":\"Remada\""))
+				.isLessThan(createResponse.body().indexOf("\"nome\":\"Supino\""));
 
 		HttpResponse<String> secondWorkoutResponse = client.send(
 				request("POST", "/treinos", """
@@ -104,7 +111,8 @@ class TreinoControllerTests {
 								{
 									"exercicioId": %d,
 									"quantidadeSeries": 4,
-									"quantidadeExecucoes": 5
+									"quantidadeExecucoes": 5,
+									"posicao": 1
 								}
 							]
 						}
@@ -113,6 +121,7 @@ class TreinoControllerTests {
 		assertThat(secondWorkoutResponse.statusCode()).isEqualTo(201);
 		assertThat(secondWorkoutResponse.body()).contains("\"quantidadeSeries\":4");
 		assertThat(secondWorkoutResponse.body()).contains("\"quantidadeExecucoes\":5");
+		assertThat(secondWorkoutResponse.body()).contains("\"posicao\":1");
 
 		HttpResponse<String> getResponse = client.send(
 				request("GET", "/treinos/" + treinoId, null),
@@ -133,17 +142,20 @@ class TreinoControllerTests {
 						{
 							"exercicioId": %d,
 							"quantidadeSeries": 3,
-							"quantidadeExecucoes": 10
+							"quantidadeExecucoes": 10,
+							"posicao": 2
 						},
 						{
 							"exercicioId": %d,
 							"quantidadeSeries": 5,
-							"quantidadeExecucoes": 8
+							"quantidadeExecucoes": 8,
+							"posicao": 3
 						},
 						{
 							"exercicioId": %d,
 							"quantidadeSeries": 4,
-							"quantidadeExecucoes": 8
+							"quantidadeExecucoes": 8,
+							"posicao": 1
 						}
 					]
 				}
@@ -159,6 +171,13 @@ class TreinoControllerTests {
 		assertThat(updateResponse.body()).contains("\"quantidadeSeries\":5");
 		assertThat(updateResponse.body()).contains("\"quantidadeSeries\":4");
 
+		HttpResponse<String> orderedExercisesResponse = client.send(
+				request("GET", "/treinos/" + treinoId, null),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(orderedExercisesResponse.statusCode()).isEqualTo(200);
+		assertThat(orderedExercisesResponse.body().indexOf("\"nome\":\"Remada\""))
+				.isLessThan(orderedExercisesResponse.body().indexOf("\"nome\":\"Supino\""));
+
 		String removeExerciseBody = """
 				{
 					"nome": "Treino B",
@@ -166,7 +185,8 @@ class TreinoControllerTests {
 						{
 							"exercicioId": %d,
 							"quantidadeSeries": 4,
-							"quantidadeExecucoes": 8
+							"quantidadeExecucoes": 8,
+							"posicao": 1
 						}
 					]
 				}
@@ -213,6 +233,33 @@ class TreinoControllerTests {
 		HttpResponse<String> response = HttpClient.newHttpClient().send(
 				request("POST", "/treinos", body, adminUsername, adminPassword),
 				HttpResponse.BodyHandlers.ofString());
+
+		assertThat(response.statusCode()).isEqualTo(400);
+	}
+
+	@Test
+	void rejectsTreinoWithInvalidExercisePosition() throws Exception {
+		HttpClient client = HttpClient.newHttpClient();
+		String adminUsername = "admin-" + UUID.randomUUID();
+		String adminPassword = "secret123";
+		registerAndPromoteToAdmin(client, adminUsername, adminPassword);
+		Long adminId = jdbcTemplate.queryForObject("select id from app_users where username = ?", Long.class,
+				adminUsername);
+
+		HttpResponse<String> response = client.send(request("POST", "/treinos", """
+				{
+					"nome": "Treino com posição inválida",
+					"appUserId": %d,
+					"exercicios": [
+						{
+							"exercicioId": 1,
+							"quantidadeSeries": 3,
+							"quantidadeExecucoes": 10,
+							"posicao": 0
+						}
+					]
+				}
+				""".formatted(adminId), adminUsername, adminPassword), HttpResponse.BodyHandlers.ofString());
 
 		assertThat(response.statusCode()).isEqualTo(400);
 	}
@@ -317,6 +364,7 @@ class TreinoControllerTests {
 		assertThat(userCreateResponse.body()).contains("\"nome\":\"Remada\"");
 		assertThat(userCreateResponse.body()).contains("\"quantidadeSeries\":3");
 		assertThat(userCreateResponse.body()).contains("\"quantidadeSeries\":4");
+		assertThat(userCreateResponse.body()).contains("\"posicao\":1");
 
 		HttpResponse<String> userDeleteResponse = client.send(
 				request("DELETE", "/treinos/1", null, username, password),

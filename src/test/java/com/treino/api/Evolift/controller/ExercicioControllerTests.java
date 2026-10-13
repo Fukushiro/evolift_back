@@ -53,16 +53,10 @@ class ExercicioControllerTests {
 						{"nome":"Agachamento"}
 						""", adminUsername, password), HttpResponse.BodyHandlers.ofString());
 		assertThat(createResponse.statusCode()).isEqualTo(201);
-		assertThat(createResponse.body()).contains("\"posicao\":1");
+		assertThat(createResponse.body()).doesNotContain("\"posicao\"");
 		Matcher idMatcher = Pattern.compile("\"id\":(\\d+)").matcher(createResponse.body());
 		assertThat(idMatcher.find()).isTrue();
 		long exerciseId = Long.parseLong(idMatcher.group(1));
-
-		HttpResponse<String> invalidPositionResponse = client.send(request(
-				"POST", "/exercicios", """
-						{"nome":"Posição inválida","posicao":0}
-						""", adminUsername, password), HttpResponse.BodyHandlers.ofString());
-		assertThat(invalidPositionResponse.statusCode()).isEqualTo(400);
 
 		HttpResponse<String> getResponse = client.send(
 				request("GET", "/exercicios/" + exerciseId, null), HttpResponse.BodyHandlers.ofString());
@@ -77,11 +71,11 @@ class ExercicioControllerTests {
 
 		HttpResponse<String> updateResponse = client.send(request(
 				"PUT", "/exercicios/" + exerciseId, """
-						{"nome":"Agachamento livre","posicao":3}
+						{"nome":"Agachamento livre"}
 						""", adminUsername, password), HttpResponse.BodyHandlers.ofString());
 		assertThat(updateResponse.statusCode()).isEqualTo(200);
 		assertThat(updateResponse.body()).contains("\"nome\":\"Agachamento livre\"");
-		assertThat(updateResponse.body()).contains("\"posicao\":3");
+		assertThat(updateResponse.body()).doesNotContain("\"posicao\"");
 
 		HttpResponse<String> deniedDelete = client.send(request(
 				"DELETE", "/exercicios/" + exerciseId, null, userUsername, password),

@@ -134,6 +134,9 @@ public class TreinoService {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 						"Quantidade de execuções deve ser maior que zero");
 			}
+			if (exercicio.posicao() != null && exercicio.posicao() < 1) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Posicao must be at least 1");
+			}
 		}
 	}
 
@@ -146,7 +149,7 @@ public class TreinoService {
 					.findFirst()
 					.orElse(null);
 			if (existente != null) {
-				existente.updateQuantidades(item.quantidadeSeries(), item.quantidadeExecucoes());
+				existente.update(item.quantidadeSeries(), item.quantidadeExecucoes(), positionOrDefault(item));
 				exerciciosMantidos.add(existente);
 				continue;
 			}
@@ -154,8 +157,13 @@ public class TreinoService {
 					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
 							"Exercise not found: " + item.exercicioId()));
 			exerciciosMantidos.add(
-					treino.addExercicio(exercicio, item.quantidadeSeries(), item.quantidadeExecucoes()));
+					treino.addExercicio(exercicio, item.quantidadeSeries(), item.quantidadeExecucoes(),
+							positionOrDefault(item)));
 		}
 		treino.retainExercicios(exerciciosMantidos);
+	}
+
+	private Integer positionOrDefault(TreinoExercicioRequest item) {
+		return item.posicao() == null ? 1 : item.posicao();
 	}
 }

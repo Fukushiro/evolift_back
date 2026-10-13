@@ -13,4 +13,5 @@
 	<include file="db/changelog/changes/006-allow-null-treino-user.xml"/>
 	<include file="db/changelog/changes/007-allow-repeated-exercises.xml"/>
 	<include file="db/changelog/changes/008-add-exercise-position.xml"/>
+	<include file="db/changelog/changes/009-move-exercise-position-to-workout.xml"/>
 </databaseChangeLog>

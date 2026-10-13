@@ -32,15 +32,19 @@ public class TreinoExercicio {
 	@Column(name = "quantidade_execucoes", nullable = false)
 	private Integer quantidadeExecucoes;
 
+	@Column(nullable = false)
+	private Integer posicao = 1;
+
 	protected TreinoExercicio() {
 	}
 
 	public TreinoExercicio(Treino treino, Exercicio exercicio, Integer quantidadeSeries,
-			Integer quantidadeExecucoes) {
+			Integer quantidadeExecucoes, Integer posicao) {
 		this.treino = treino;
 		this.exercicio = exercicio;
 		this.quantidadeSeries = quantidadeSeries;
 		this.quantidadeExecucoes = quantidadeExecucoes;
+		this.posicao = posicao;
 	}
 
 	public Long getId() {
@@ -59,8 +63,13 @@ public class TreinoExercicio {
 		return quantidadeExecucoes;
 	}
 
-	public void updateQuantidades(Integer quantidadeSeries, Integer quantidadeExecucoes) {
+	public Integer getPosicao() {
+		return posicao;
+	}
+
+	public void update(Integer quantidadeSeries, Integer quantidadeExecucoes, Integer posicao) {
 		this.quantidadeSeries = quantidadeSeries;
 		this.quantidadeExecucoes = quantidadeExecucoes;
+		this.posicao = posicao;
 	}
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+	<changeSet id="009-move-exercise-position-to-workout" author="codex">
+		<addColumn tableName="treino_exercicios">
+			<column name="posicao" type="INT" defaultValueNumeric="1">
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+
+		<sql>
+			UPDATE treino_exercicios
+			SET posicao = (
+				SELECT exercicios.posicao
+				FROM exercicios
+				WHERE exercicios.id = treino_exercicios.exercicio_id
+			)
+		</sql>
+
+		<sql>
+			ALTER TABLE treino_exercicios
+			ADD CONSTRAINT ck_treino_exercicios_posicao CHECK (posicao &gt;= 1)
+		</sql>
+
+		<dropColumn tableName="exercicios" columnName="posicao"/>
+	</changeSet>
+</databaseChangeLog>

@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "bfe63f1f-ccf2-4b5e-83da-748c8200db46",
 		"name": "Evolift",
-		"description": "Collection for a API Evolift. Configure adminUsername/adminPassword com um usuário ADMIN e userUsername/userPassword com um usuário comum. Treinos são vinculados ao usuário autenticado; crie um usuário antes de criar treinos. Exercícios podem ser consultados por todos, mas criados, alterados e removidos somente por administradores.",
+		"description": "Collection for a API Evolift. Configure adminUsername/adminPassword com um usuário ADMIN e userUsername/userPassword com um usuário comum. Treinos são vinculados ao usuário autenticado; crie um usuário antes de criar treinos. Exercícios podem ser consultados por todos, mas criados, alterados e removidos somente por administradores. A posicao é informada em cada item de exercicios no POST/PUT de treinos (mínimo 1, padrão 1), pois pertence ao vínculo entre treino e exercício.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -50,7 +50,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Supino reto\",\n\t\"posicao\": 1\n}"
+					"raw": "{\n\t\"nome\": \"Supino reto\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/exercicios",
@@ -106,7 +106,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Remada baixa\",\n\t\"posicao\": 2\n}"
+					"raw": "{\n\t\"nome\": \"Remada baixa\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/exercicios",
@@ -197,7 +197,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Supino reto atualizado\",\n\t\"posicao\": 3\n}"
+					"raw": "{\n\t\"nome\": \"Supino reto atualizado\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/exercicios/{{exercicioId}}",
@@ -304,7 +304,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Treino A\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 2,\n\t\t\t\"quantidadeExecucoes\": 10\n\t\t}\n\t]\n}"
+					"raw": "{\n\t\"nome\": \"Treino A\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 2,\n\t\t\t\"quantidadeExecucoes\": 10,\n\t\t\t\"posicao\": 1\n\t\t}\n\t]\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/treinos",
@@ -334,7 +334,7 @@
 			"response": []
 		},
 		{
-			"name": "Criar outro Treino (mesmo exercício, outras quantidades)",
+			"name": "Criar outro Treino (mesmo exercício, posição independente)",
 			"request": {
 				"method": "POST",
 				"auth": {
@@ -360,7 +360,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Treino B\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 4,\n\t\t\t\"quantidadeExecucoes\": 5\n\t\t}\n\t]\n}"
+					"raw": "{\n\t\"nome\": \"Treino B\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 4,\n\t\t\t\"quantidadeExecucoes\": 5,\n\t\t\t\"posicao\": 2\n\t\t}\n\t]\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/treinos",
@@ -449,7 +449,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Treino A atualizado\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 3,\n\t\t\t\"quantidadeExecucoes\": 10\n\t\t},\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId2}},\n\t\t\t\"quantidadeSeries\": 4,\n\t\t\t\"quantidadeExecucoes\": 8\n\t\t}\n\t]\n}"
+					"raw": "{\n\t\"nome\": \"Treino A atualizado\",\n\t\"appUserId\": {{userId}},\n\t\"exercicios\": [\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId}},\n\t\t\t\"quantidadeSeries\": 3,\n\t\t\t\"quantidadeExecucoes\": 10,\n\t\t\t\"posicao\": 1\n\t\t},\n\t\t{\n\t\t\t\"exercicioId\": {{exercicioId2}},\n\t\t\t\"quantidadeSeries\": 4,\n\t\t\t\"quantidadeExecucoes\": 8,\n\t\t\t\"posicao\": 2\n\t\t}\n\t]\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/treinos/{{treinoId}}",

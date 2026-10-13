@@ -31,14 +31,13 @@ public class ExercicioService {
 	}
 
 	public Exercicio create(ExercicioRequest request) {
-		return exercicioRepository.save(new Exercicio(validateNome(request), validatePosicao(request)));
+		return exercicioRepository.save(new Exercicio(validateNome(request)));
 	}
 
 	public Exercicio update(Long id, ExercicioRequest request) {
 		String nome = validateNome(request);
-		Integer posicao = validatePosicao(request);
 		Exercicio exercicio = findById(id);
-		exercicio.update(nome, posicao);
+		exercicio.update(nome);
 		return exercicioRepository.save(exercicio);
 	}
 
@@ -57,11 +56,4 @@ public class ExercicioService {
 		return request.nome().trim();
 	}
 
-	private Integer validatePosicao(ExercicioRequest request) {
-		Integer posicao = request.posicao() == null ? 1 : request.posicao();
-		if (posicao < 1) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Posicao must be at least 1");
-		}
-		return posicao;
-	}
 }
