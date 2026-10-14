@@ -42,7 +42,8 @@ class TreinoControllerTests {
 		HttpResponse<String> exerciseResponse = client.send(
 				request("POST", "/exercicios", """
 						{
-							"nome": "Supino"
+							"nome": "Supino",
+							"videoUrl": "https://cdn.example.com/videos/supino.mp4"
 						}
 						""", adminUsername, adminPassword),
 				HttpResponse.BodyHandlers.ofString());
@@ -94,6 +95,7 @@ class TreinoControllerTests {
 		long treinoId = Long.parseLong(idMatcher.group(1));
 		assertThat(createResponse.body()).contains("\"nome\":\"Treino A\"");
 		assertThat(createResponse.body()).contains("\"nome\":\"Supino\"");
+		assertThat(createResponse.body()).contains("\"videoUrl\":\"https://cdn.example.com/videos/supino.mp4\"");
 		assertThat(createResponse.body()).contains("\"quantidadeSeries\":2");
 		assertThat(createResponse.body()).contains("\"quantidadeSeries\":5");
 		assertThat(createResponse.body()).contains("\"quantidadeExecucoes\":10");

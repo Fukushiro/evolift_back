@@ -18,11 +18,15 @@ public class Exercicio {
 	@Column(nullable = false, length = 150)
 	private String nome;
 
+	@Column(name = "video_url", length = 2048)
+	private String videoUrl;
+
 	protected Exercicio() {
 	}
 
-	public Exercicio(String nome) {
+	public Exercicio(String nome, String videoUrl) {
 		this.nome = nome;
+		this.videoUrl = videoUrl;
 	}
 
 	public Long getId() {
@@ -33,7 +37,12 @@ public class Exercicio {
 		return nome;
 	}
 
-	public void update(String nome) {
+	public String getVideoUrl() {
+		return videoUrl;
+	}
+
+	public void update(String nome, String videoUrl) {
 		this.nome = nome;
+		this.videoUrl = videoUrl;
 	}
 }

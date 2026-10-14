@@ -50,10 +50,11 @@ class ExercicioControllerTests {
 
 		HttpResponse<String> createResponse = client.send(request(
 				"POST", "/exercicios", """
-						{"nome":"Agachamento"}
+						{"nome":"Agachamento","videoUrl":"https://cdn.example.com/videos/agachamento.mp4"}
 						""", adminUsername, password), HttpResponse.BodyHandlers.ofString());
 		assertThat(createResponse.statusCode()).isEqualTo(201);
 		assertThat(createResponse.body()).doesNotContain("\"posicao\"");
+		assertThat(createResponse.body()).contains("\"videoUrl\":\"https://cdn.example.com/videos/agachamento.mp4\"");
 		Matcher idMatcher = Pattern.compile("\"id\":(\\d+)").matcher(createResponse.body());
 		assertThat(idMatcher.find()).isTrue();
 		long exerciseId = Long.parseLong(idMatcher.group(1));
@@ -62,6 +63,7 @@ class ExercicioControllerTests {
 				request("GET", "/exercicios/" + exerciseId, null), HttpResponse.BodyHandlers.ofString());
 		assertThat(getResponse.statusCode()).isEqualTo(200);
 		assertThat(getResponse.body()).contains("\"nome\":\"Agachamento\"");
+		assertThat(getResponse.body()).contains("\"videoUrl\":\"https://cdn.example.com/videos/agachamento.mp4\"");
 
 		HttpResponse<String> deniedUpdate = client.send(request(
 				"PUT", "/exercicios/" + exerciseId, """
@@ -71,11 +73,19 @@ class ExercicioControllerTests {
 
 		HttpResponse<String> updateResponse = client.send(request(
 				"PUT", "/exercicios/" + exerciseId, """
-						{"nome":"Agachamento livre"}
+						{"nome":"Agachamento livre","videoUrl":"https://cdn.example.com/videos/agachamento-livre.mp4"}
 						""", adminUsername, password), HttpResponse.BodyHandlers.ofString());
 		assertThat(updateResponse.statusCode()).isEqualTo(200);
 		assertThat(updateResponse.body()).contains("\"nome\":\"Agachamento livre\"");
+		assertThat(updateResponse.body())
+				.contains("\"videoUrl\":\"https://cdn.example.com/videos/agachamento-livre.mp4\"");
 		assertThat(updateResponse.body()).doesNotContain("\"posicao\"");
+
+		HttpResponse<String> invalidVideoUrlResponse = client.send(request(
+				"PUT", "/exercicios/" + exerciseId, """
+						{"nome":"Agachamento livre","videoUrl":"javascript:alert(1)"}
+						""", adminUsername, password), HttpResponse.BodyHandlers.ofString());
+		assertThat(invalidVideoUrlResponse.statusCode()).isEqualTo(400);
 
 		HttpResponse<String> deniedDelete = client.send(request(
 				"DELETE", "/exercicios/" + exerciseId, null, userUsername, password),

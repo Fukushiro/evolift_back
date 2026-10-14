@@ -50,7 +50,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Supino reto\"\n}"
+					"raw": "{\n\t\"nome\": \"Supino reto\",\n\t\"videoUrl\": \"https://cdn.example.com/videos/supino-reto.mp4\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/exercicios",
@@ -197,7 +197,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"nome\": \"Supino reto atualizado\"\n}"
+					"raw": "{\n\t\"nome\": \"Supino reto atualizado\",\n\t\"videoUrl\": \"https://cdn.example.com/videos/supino-reto-atualizado.mp4\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/exercicios/{{exercicioId}}",
