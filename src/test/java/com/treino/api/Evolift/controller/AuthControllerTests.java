@@ -23,6 +23,25 @@ class AuthControllerTests {
 	private int port;
 
 	@Test
+	void allowsCorsPreflightFromFrontend() throws Exception {
+		HttpRequest preflight = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/auth/login"))
+				.header("Origin", "http://localhost:8081")
+				.header("Access-Control-Request-Method", "POST")
+				.header("Access-Control-Request-Headers", "content-type")
+				.method("OPTIONS", HttpRequest.BodyPublishers.noBody())
+				.build();
+
+		HttpResponse<String> response = HttpClient.newHttpClient()
+				.send(preflight, HttpResponse.BodyHandlers.ofString());
+
+		assertThat(response.statusCode()).isEqualTo(200);
+		assertThat(response.headers().firstValue("Access-Control-Allow-Origin"))
+				.contains("http://localhost:8081");
+		assertThat(response.headers().firstValue("Access-Control-Allow-Methods"))
+				.hasValueSatisfying(methods -> assertThat(methods).contains("POST"));
+	}
+
+	@Test
 	void registerAndLoginUser() throws Exception {
 		String username = "user-" + UUID.randomUUID();
 		String password = "secret123";
