@@ -15,4 +15,5 @@
 	<include file="db/changelog/changes/008-add-exercise-position.xml"/>
 	<include file="db/changelog/changes/009-move-exercise-position-to-workout.xml"/>
 	<include file="db/changelog/changes/010-add-exercise-video-url.xml"/>
+	<include file="db/changelog/changes/011-seed-exercicios.xml"/>
 </databaseChangeLog>
